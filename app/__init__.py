@@ -67,15 +67,31 @@ def create_app(config_name):
     app.register_blueprint(proposal_blueprint)
     app.register_blueprint(request_blueprint)
 
+
+    @app.errorhandler(400)
+    def bad_request(error):
+        return jsonify({'errors': 'Bad Request'}), 400
+
+    @app.errorhandler(401)
+    def bad_request(error):
+        return jsonify({'errors': 'Unauthorized'}), 401
+
+    @app.errorhandler(403)
+    def forbidden(error):
+        return jsonify({'errors': 'Forbidden'}), 403
+
+    @app.errorhandler(404)
+    def page_not_found(error):
+        return jsonify({'errors': 'Page Not Found'}), 404
+
+    @app.errorhandler(500)
+    def internal_server_error(error):
+        return jsonify({'errors': 'Server Error'}), 500
+
     # temporary route
     @app.route('/')
     def hello_world():
         return 'Hello, World!'
-
-    @app.route('/token')
-    @ratelimit(limit=30, per=30 * 1)
-    def index():
-        return jsonify({'response': 'This is a rate limited response'})
 
     return app
 
