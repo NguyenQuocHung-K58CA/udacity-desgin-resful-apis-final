@@ -5,12 +5,14 @@ from sqlalchemy import and_
 
 
 from app import db, auth
+from app.utils.rate_limit import ratelimit
 from app.models import Request
 from . import request as request_api
 
 
 @request_api.route('/api/v1/requests', methods=['GET'])
 @auth.login_required
+@ratelimit(limit=180, per=60*1, scope_func=lambda: g.user.id)
 def get_all_requests():
     user = g.user
     requests = Request.query.filter(user.id != Request.user_id).all()
@@ -20,6 +22,7 @@ def get_all_requests():
 
 @request_api.route('/api/v1/requests', methods=['POST'])
 @auth.login_required
+@ratelimit(limit=180, per=60*1, scope_func=lambda: g.user.id)
 def create_new_request():
     errors = Request.validate(request.json)
     if len(errors)==0:
@@ -43,6 +46,7 @@ def create_new_request():
 
 @request_api.route('/api/v1/requests/<int:id>', methods=['GET'])
 @auth.login_required
+@ratelimit(limit=180, per=60*1, scope_func=lambda: g.user.id)
 def get_request_by_id(id):
     req = Request.query.get_or_404(id)
     if not req:
@@ -53,6 +57,7 @@ def get_request_by_id(id):
 
 @request_api.route('/api/v1/requests/<int:id>', methods=['PUT'])
 @auth.login_required
+@ratelimit(limit=180, per=60*1, scope_func=lambda: g.user.id)
 def update_request(id):
     user = g.user
     req = Request.query.filter(and_(Request.id == id, user.id == Request.user_id))
@@ -83,6 +88,7 @@ def update_request(id):
 
 @request_api.route('/api/v1/requests/<int:id>', methods=['DELETE'])
 @auth.login_required
+@ratelimit(limit=180, per=60*1, scope_func=lambda: g.user.id)
 def delete_request(id):
     user = g.user
     req = Request.query.filter(and_(Request.id == id, user.id == Request.user_id)).first()

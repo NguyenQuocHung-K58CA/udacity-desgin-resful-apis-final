@@ -1,4 +1,5 @@
 __all__ = [
     "find_restaurant",
-    "geocode"
+    "geocode",
+    "rate_limit"
 ]

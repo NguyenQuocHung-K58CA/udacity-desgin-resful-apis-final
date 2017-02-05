@@ -9,11 +9,13 @@ import json
 
 
 from app.models import User
+from app.utils.rate_limit import ratelimit
 from app import auth, db
 from . import oauth2
 
 
 @oauth2.route('/api/v1/<provider>/login', methods=['POST'])
+@ratelimit(limit=180, per=60*1)
 def login(provider):
     # STEP 1 - Parse the auth code
     auth_code = request.json.get('auth_code')
@@ -74,6 +76,7 @@ def login(provider):
 
 @oauth2.route('/api/v1/<provider>/logout', methods=['POST'])
 @auth.login_required
+@ratelimit(limit=180, per=60*1)
 def logout(provider):
     g.user = None
     return jsonify({'status': 'ok'})

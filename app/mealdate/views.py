@@ -5,6 +5,7 @@ from sqlalchemy import or_, and_
 
 
 from app import db, auth
+from app.utils.rate_limit import ratelimit
 from app.utils.find_restaurant import find_restaurant
 from app.models import MealDate, Proposal, Request
 from . import mealdate
@@ -12,6 +13,7 @@ from . import mealdate
 
 @mealdate.route('/api/v1/dates', methods=['GET'])
 @auth.login_required
+@ratelimit(limit=180, per=60*1, scope_func=lambda: g.user.id)
 def get_all_dates():
     user = g.user
     dates = MealDate.query.filter(or_(
@@ -25,6 +27,7 @@ def get_all_dates():
 
 @mealdate.route('/api/v1/dates', methods=['POST'])
 @auth.login_required
+@ratelimit(limit=180, per=60*1, scope_func=lambda: g.user.id)
 def create_newdate():
     errors = MealDate.validate(request.json)
     if len(errors) == 0:
@@ -75,6 +78,7 @@ def create_newdate():
 
 @mealdate.route('/api/v1/dates/<int:id>', methods=['GET'])
 @auth.login_required
+@ratelimit(limit=180, per=60*1, scope_func=lambda: g.user.id)
 def get_date_by_id(id):
     user = g.user
     meal_date = MealDate.query.filter(and_(
@@ -89,6 +93,7 @@ def get_date_by_id(id):
 
 @mealdate.route('/api/v1/dates/<int:id>', methods=['PUT'])
 @auth.login_required
+@ratelimit(limit=180, per=60*1, scope_func=lambda: g.user.id)
 def update_date(id):
     old_date = MealDate.query.filter_by(id=id)
     errors = MealDate.validate(request.json)
@@ -139,6 +144,7 @@ def update_date(id):
 
 @mealdate.route('/api/v1/dates/<int:id>', methods=['DELETE'])
 @auth.login_required
+@ratelimit(limit=180, per=60*1, scope_func=lambda: g.user.id)
 def delete_date(id):
     user = g.user
     meal_date = MealDate.query.filter(and_(

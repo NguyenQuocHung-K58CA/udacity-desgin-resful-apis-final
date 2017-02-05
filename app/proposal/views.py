@@ -5,12 +5,14 @@ from sqlalchemy import or_, and_
 
 
 from app import db, auth
+from app.utils.rate_limit import ratelimit
 from app.models import Proposal, Request
 from . import proposal
 
 
 @proposal.route('/api/v1/proposals', methods=['GET'])
 @auth.login_required
+@ratelimit(limit=180, per=60*1, scope_func=lambda: g.user.id)
 def get_all_proposals():
     user = g.user
     proposals = Proposal.query.filter_by(user_proposed_to=user.id).all()
@@ -20,6 +22,7 @@ def get_all_proposals():
 
 @proposal.route('/api/v1/proposals', methods=['POST'])
 @auth.login_required
+@ratelimit(limit=180, per=60*1, scope_func=lambda: g.user.id)
 def create_new_proposal():
     errors = Proposal.validate(request.json)
 
@@ -43,6 +46,7 @@ def create_new_proposal():
 
 @proposal.route('/api/v1/proposals/<int:id>', methods=['GET'])
 @auth.login_required
+@ratelimit(limit=180, per=60*1, scope_func=lambda: g.user.id)
 def get_proposal_by_id(id):
     user = g.user
     proposals = Proposal.query.filter(or_(
@@ -55,6 +59,7 @@ def get_proposal_by_id(id):
 
 @proposal.route('/api/v1/proposals/<int:id>', methods=['PUT'])
 @auth.login_required
+@ratelimit(limit=180, per=60*1, scope_func=lambda: g.user.id)
 def update_proposal(id):
     errors = Proposal.validate(request.json)
     if len(errors) > 0:
@@ -89,6 +94,7 @@ def update_proposal(id):
 
 @proposal.route('/api/v1/proposals/<int:id>', methods=['DELETE'])
 @auth.login_required
+@ratelimit(limit=180, per=60*1, scope_func=lambda: g.user.id)
 def delete_proposal(id):
     user = g.user
     proposal = Proposal.query.filter(and_(

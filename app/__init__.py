@@ -1,8 +1,9 @@
-from flask import Flask, g
+from flask import Flask, g, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_httpauth import HTTPBasicAuth
+from app.utils.rate_limit import ratelimit, get_view_rate_limit
 
 
 from config import app_config
@@ -37,6 +38,16 @@ def create_app(config_name):
     app.config.from_pyfile('config.py')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
+    @app.after_request
+    def inject_x_rate_headers(response):
+        limit = get_view_rate_limit()
+        if limit and limit.send_x_headers:
+            h = response.headers
+            h.add('X-RateLimit-Remaining', str(limit.remaining))
+            h.add('X-RateLimit-Limit', str(limit.limit))
+            h.add('X-RateLimit-Reset', str(limit.reset))
+        return response
+
     db.init_app(app)
     CORS(app)
 
@@ -60,6 +71,11 @@ def create_app(config_name):
     @app.route('/')
     def hello_world():
         return 'Hello, World!'
+
+    @app.route('/token')
+    @ratelimit(limit=30, per=30 * 1)
+    def index():
+        return jsonify({'response': 'This is a rate limited response'})
 
     return app
 
