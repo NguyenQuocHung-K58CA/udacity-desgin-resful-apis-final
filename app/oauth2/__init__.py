@@ -1,7 +1,7 @@
 from flask import Blueprint
 
 
-request = Blueprint('request', __name__)
+oauth2 = Blueprint('oauth2', __name__)
 
 
 from . import views
