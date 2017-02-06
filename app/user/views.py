@@ -7,9 +7,10 @@ from app import db, auth
 from app.utils.rate_limit import ratelimit
 from app.models import User
 from . import user
+from .forms import UserSchema
 
 
-@user.route('/token', methods=['GET'])
+@user.route('/api/v1/token', methods=['GET'])
 @auth.login_required
 @ratelimit(limit=180, per=60*1, scope_func=lambda: g.user.id)
 def get_token():
@@ -39,7 +40,7 @@ def get_user_profile(id):
 @user.route('/api/v1/users', methods=['POST'])
 @ratelimit(limit=180, per=60*1)
 def create_new_user():
-    errors = User.validate(request.json)
+    errors = UserSchema().load(request.json).errors
     if len(errors):
         return jsonify({'errors': errors})
 
@@ -65,7 +66,7 @@ def update_user():
     user = g.user
     user = User.query.get_or_404(user.id)
 
-    errors = User.validate(request.json)
+    errors = UserSchema().load(request.json).errors
     if len(errors):
         return jsonify({'errors': errors})
 
