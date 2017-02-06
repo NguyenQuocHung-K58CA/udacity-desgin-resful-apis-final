@@ -5,6 +5,7 @@ from flask import abort
 
 from app import db, auth
 from app.utils.rate_limit import ratelimit
+from app.utils.json_required import json_required
 from app.models import User
 from . import user
 from .forms import UserSchema
@@ -39,8 +40,10 @@ def get_user_profile(id):
 
 @user.route('/api/v1/users', methods=['POST'])
 @ratelimit(limit=180, per=60*1)
+@json_required
 def create_new_user():
     errors = UserSchema().load(request.json).errors
+    print errors
     if len(errors):
         return jsonify({'errors': errors})
 
@@ -61,6 +64,7 @@ def create_new_user():
 
 @user.route('/api/v1/users', methods=['PUT'])
 @auth.login_required
+@json_required
 @ratelimit(limit=180, per=60*1, scope_func=lambda: g.user.id)
 def update_user():
     user = g.user

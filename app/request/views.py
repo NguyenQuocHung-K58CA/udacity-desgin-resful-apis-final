@@ -6,6 +6,7 @@ from sqlalchemy import and_
 
 from app import db, auth
 from app.utils.rate_limit import ratelimit
+from app.utils.json_required import json_required
 from app.models import Request
 from . import request as request_api
 
@@ -22,6 +23,7 @@ def get_all_requests():
 
 @request_api.route('/api/v1/requests', methods=['POST'])
 @auth.login_required
+@json_required
 @ratelimit(limit=180, per=60*1, scope_func=lambda: g.user.id)
 def create_new_request():
     errors = Request.validate(request.json)
@@ -57,6 +59,7 @@ def get_request_by_id(id):
 
 @request_api.route('/api/v1/requests/<int:id>', methods=['PUT'])
 @auth.login_required
+@json_required
 @ratelimit(limit=180, per=60*1, scope_func=lambda: g.user.id)
 def update_request(id):
     user = g.user

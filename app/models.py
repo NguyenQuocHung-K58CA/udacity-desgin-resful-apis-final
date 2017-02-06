@@ -40,24 +40,6 @@ class User(db.Model):
         user_id = data['id']
         return user_id
 
-    @staticmethod
-    def validate(item):
-        required_fields = ['username', 'password', 'email']
-        errors = []
-
-        if type(item) != dict:
-            errors.append({'error': "item must be a dict"})
-        else:
-            for key in required_fields:
-                if not key in item:
-                    error = {key: 'required'}
-                    errors.append(error)
-                elif not item[key]:
-                    error = {key: 'required'}
-                    errors.append(error)
-
-        return errors
-
     @property
     def serialize(self):
         return {

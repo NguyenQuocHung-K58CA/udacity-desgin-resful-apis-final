@@ -6,6 +6,7 @@ from sqlalchemy import or_, and_
 
 from app import db, auth
 from app.utils.rate_limit import ratelimit
+from app.utils.json_required import json_required
 from app.utils.find_restaurant import find_restaurant
 from app.models import MealDate, Proposal, Request
 from . import mealdate
@@ -27,6 +28,7 @@ def get_all_dates():
 
 @mealdate.route('/api/v1/dates', methods=['POST'])
 @auth.login_required
+@json_required
 @ratelimit(limit=180, per=60*1, scope_func=lambda: g.user.id)
 def create_newdate():
     errors = MealDate.validate(request.json)
@@ -93,6 +95,7 @@ def get_date_by_id(id):
 
 @mealdate.route('/api/v1/dates/<int:id>', methods=['PUT'])
 @auth.login_required
+@json_required
 @ratelimit(limit=180, per=60*1, scope_func=lambda: g.user.id)
 def update_date(id):
     old_date = MealDate.query.filter_by(id=id)

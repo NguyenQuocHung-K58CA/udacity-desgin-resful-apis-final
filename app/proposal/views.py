@@ -6,6 +6,7 @@ from sqlalchemy import or_, and_
 
 from app import db, auth
 from app.utils.rate_limit import ratelimit
+from app.utils.json_required import json_required
 from app.models import Proposal, Request
 from . import proposal
 
@@ -22,6 +23,7 @@ def get_all_proposals():
 
 @proposal.route('/api/v1/proposals', methods=['POST'])
 @auth.login_required
+@json_required
 @ratelimit(limit=180, per=60*1, scope_func=lambda: g.user.id)
 def create_new_proposal():
     errors = Proposal.validate(request.json)
@@ -59,6 +61,7 @@ def get_proposal_by_id(id):
 
 @proposal.route('/api/v1/proposals/<int:id>', methods=['PUT'])
 @auth.login_required
+@json_required
 @ratelimit(limit=180, per=60*1, scope_func=lambda: g.user.id)
 def update_proposal(id):
     errors = Proposal.validate(request.json)
